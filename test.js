@@ -84,6 +84,7 @@ module.exports = {
 	var replica2 = { "foo": 1, "bar": 0, "baz": 1, "qux": 1 }; 
 	var replica3 = { "foo": 1, "bar": 1, "baz": 0, "qux": 1 }; 
 	var replica4 = { "foo": 1, "bar": 1, "baz": 1, "qux": 0 };
+	
 	function checkReplica(name, replica) {
 	    var updateList = sync.detectUpdates(snap, replica);
 	    assert.equal(updateList.length, 1);
@@ -100,6 +101,21 @@ module.exports = {
 	var target = {foo: "qux"};
 	sync.applyCommand(target, c);
 	assert.equal(target.foo, "bar");
+	var newCommand = new sync.Command("edit", ["foo", {"id" : 3}, "name"], "test");
+	var newTarget = {foo : [{"id" : 1,
+				 "name" : "one"},
+				{"id" : 2,
+				 "name" : "two"},
+				{"id" : 3,
+				 "name" : "three"},
+				{"id" : 4,
+				 "name" : "four"}]
+			};
+	sync.applyCommand(newTarget, newCommand);
+	assert.equal(newTarget.foo[0].name, "one");
+	assert.equal(newTarget.foo[1].name, "two");
+	assert.equal(newTarget.foo[2].name, "test");
+	assert.equal(newTarget.foo[3].name, "four");
     }
 };
 
