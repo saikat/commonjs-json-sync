@@ -306,10 +306,18 @@ function applyCommand(target, command) {
     var container =
 	pathToReference(target, command.path.slice(0, command.path.length - 1));
 
+    if (!container) {
+      return;
+    }
+
     if (command.action == "remove")
-	delete container[command.path[command.path.length - 1]];
-    
-    container[command.path[command.path.length - 1]] = command.value;
+      delete container[command.path[command.path.length - 1]];
+
+    if (command.action == "create" && 
+        isArray(container))
+        container.splice(command.path[command.path.length-1], 0, command.value);
+    else
+      container[command.path[command.path.length - 1]] = command.value;
 }
 
 /**

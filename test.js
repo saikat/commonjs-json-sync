@@ -116,7 +116,90 @@ module.exports = {
 	assert.equal(newTarget.foo[1].name, "two");
 	assert.equal(newTarget.foo[2].name, "test");
 	assert.equal(newTarget.foo[3].name, "four");
-    }
+    },
+    'test applyCommand on non-existent object' : function(assert) {
+	var newCommand = new sync.Command("edit", ["foo", {"id" : 6}, "name"], "test");
+	var newTarget = {foo : [{"id" : 1,
+				 "name" : "one"},
+				{"id" : 2,
+				 "name" : "two"},
+				{"id" : 3,
+				 "name" : "three"},
+				{"id" : 4,
+				 "name" : "four"}]
+			};
+	sync.applyCommand(newTarget, newCommand);
+	assert.equal(newTarget.foo[0].name, "one");
+	assert.equal(newTarget.foo[1].name, "two");
+	assert.equal(newTarget.foo[2].name, "three");
+	assert.equal(newTarget.foo[3].name, "four");
+
+	var newCommand = new sync.Command("delete", ["foo", {"id" : 6}]);
+	var newTarget = {foo : [{"id" : 1,
+				 "name" : "one"},
+				{"id" : 2,
+				 "name" : "two"}]
+			};
+	sync.applyCommand(newTarget, newCommand);
+	assert.equal(newTarget.foo[0].name, "one");
+	assert.equal(newTarget.foo[1].name, "two");
+	var newCommand = new sync.Command("create", ["foo", {"id" : 5}, "objects", 3], {"id" : 9, "name" : "new"});
+	var newTarget = {foo : [{"id" : 1,
+				 "name" : "one"},
+				{"id" : 2,
+				 "name" : "two"}]
+			};
+	sync.applyCommand(newTarget, newCommand);
+	assert.equal(newTarget.foo[0].name, "one");
+	assert.equal(newTarget.foo[1].name, "two");
+
+	var newCommand = new sync.Command("create", ["foo", {"id" : 2}, "objects", 3], {"id" : 9, "name" : "new"});
+	var newTarget = {foo : [{"id" : 1,
+				 "name" : "one"},
+				{"id" : 2,
+				 "objects" : [{"id" : 8, "name" : "eight"},
+					      {"id" : 10, "name" : "ten"}]}]
+			};
+	sync.applyCommand(newTarget, newCommand);
+	assert.equal(newTarget.foo[1].objects[2].name, "new");
+	assert.equal(newTarget.foo[1].objects[2].id, 9);
+
+	var newCommand = new sync.Command("create", ["foo", {"id" : 2}, "objects", 1], {"id" : 9, "name" : "new"});
+	var newTarget = {foo : [{"id" : 1,
+				 "name" : "one"},
+				{"id" : 2,
+				 "objects" : [{"id" : 8, "name" : "eight"},
+					      {"id" : 10, "name" : "ten"}]}]
+			};
+	sync.applyCommand(newTarget, newCommand);
+	assert.equal(newTarget.foo[1].objects[0].id, 8);
+	assert.equal(newTarget.foo[1].objects[1].id, 9);
+	assert.equal(newTarget.foo[1].objects[2].id, 10);
+    },
+    'test applyCommand on an object that has moved' : function(assert) {
+	var newCommand = new sync.Command("edit", ["foo", {"id" : 6}, "name"], "test");
+	var newTarget = {foo : [{"id" : 1,
+				 "name" : "one"},
+				{"id" : 2,
+				 "name" : "two"},
+				{"id" : 3,
+				 "name" : "three"},
+				{"id" : 4,
+				 "name" : "four"},
+				{"id" : 5,
+				 "objects" : [{"id" : 8,
+					       "name" : "eight"},
+					      {"id" : 6,
+					       "name" : "hello"}]}]
+			};
+	sync.applyCommand(newTarget, newCommand);
+	assert.equal(newTarget.foo[0].name, "one");
+	assert.equal(newTarget.foo[1].name, "two");
+	assert.equal(newTarget.foo[2].name, "three");
+	assert.equal(newTarget.foo[3].name, "four");
+	assert.equal(newTarget.foo[4].objects[1].name, "hello");
+    },
+    
 };
 
 
