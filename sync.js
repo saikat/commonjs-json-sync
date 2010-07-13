@@ -307,17 +307,17 @@ function applyCommand(target, command) {
 	pathToReference(target, command.path.slice(0, command.path.length - 1));
 
     if (!container) {
-      return;
+	return;
     }
 
     if (command.action == "remove")
-      delete container[command.path[command.path.length - 1]];
+	delete container[command.path[command.path.length - 1]];
 
     if (command.action == "create" && 
         isArray(container))
         container.splice(command.path[command.path.length-1], 0, command.value);
     else
-      container[command.path[command.path.length - 1]] = command.value;
+	container[command.path[command.path.length - 1]] = command.value;
 }
 
 /**
