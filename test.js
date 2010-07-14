@@ -152,7 +152,7 @@ module.exports = {
 	sync.applyCommand(newTarget, newCommand);
 	assert.equal(newTarget.foo[0].name, "one");
 	assert.equal(newTarget.foo[1].name, "two");
-	assert.equal(foo.length, 2);
+	assert.equal(newTarget.foo.length, 2);
 
 	var newCommand = new sync.Command("create", ["foo", {"id" : 2}, "objects", 3], {"id" : 9, "name" : "new"});
 	var newTarget = {foo : [{"id" : 1,
