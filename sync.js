@@ -281,15 +281,8 @@ function _detectUpdates(stack, snapshot, current) {
 function pathToReference(obj, path) {
     return reduce(function (reference, segment) {
 	if (reference) {
-	    if (typeof segment === "object" && segment.hasOwnProperty("id")) {
-		var count = reference.length,
-		obj = null;
-		while (count--)
-		    if (reference[count].id === segment.id)
-			return reference[count];
-		
-		return null;
-	    }
+	    if (typeof segment === "object" && segment.hasOwnProperty("id")) 
+		return idToReferenceAndIndex(reference, segment.id).obj;
 	    else
 		return reference[segment];
 	}
@@ -297,6 +290,20 @@ function pathToReference(obj, path) {
 	    return reference;
     }, 
                   path, obj);
+}
+
+function idToReferenceAndIndex(anArray, anId) {
+    if (!isArray(anArray))
+	return null;
+
+    var count = anArray.length,
+    reference = null;
+    while (count--)
+	if (anArray[count] && anArray[count].id == anId) {
+	    reference = anArray[count];
+	    break;
+	}
+    return {"obj" : reference, "index" : count};
 }
 
 /**
@@ -310,13 +317,27 @@ function applyCommand(target, command) {
 	return;
     }
 
-    if (command.action == "remove")
-	delete container[command.path[command.path.length - 1]];
+    if (command.action == "move") {
+	if (!command.path[command.path.length-1].hasOwnProperty("id"))
+	    return;
 
-    if (command.action == "create" && 
+	var reference = idToReferenceAndIndex(container, command.path[command.path.length-1].id),
+	newContainer = pathToReference(target, command.value.slice(0, command.value.length - 1));
+	if (!newContainer || !isArray(newContainer))
+	    return;
+
+	container.splice(reference.index, 1);
+	newContainer.splice(command.value[command.value.length - 1], 0, reference.obj);
+    }
+	
+    if (command.action == "remove")
+	container.splice([command.path[command.path.length - 1]]);
+
+    else if (command.action == "create" && 
         isArray(container))
         container.splice(command.path[command.path.length-1], 0, command.value);
-    else
+	
+    else if (command.action == "create" || command.action == "edit")
 	container[command.path[command.path.length - 1]] = command.value;
 }
 

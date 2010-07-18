@@ -96,7 +96,7 @@ module.exports = {
 	checkReplica("replica3", replica3);
 	checkReplica("replica4", replica4);
     },
-    'test applyCommand' : function(assert) {
+    'test applyCommand to edit an object' : function(assert) {
 	var c = new sync.Command("edit", ["foo"], "bar");
 	var target = {foo: "qux"};
 	sync.applyCommand(target, c);
@@ -143,6 +143,7 @@ module.exports = {
 	sync.applyCommand(newTarget, newCommand);
 	assert.equal(newTarget.foo[0].name, "one");
 	assert.equal(newTarget.foo[1].name, "two");
+
 	var newCommand = new sync.Command("create", ["foo", {"id" : 5}, "objects", 3], {"id" : 9, "name" : "new"});
 	var newTarget = {foo : [{"id" : 1,
 				 "name" : "one"},
@@ -153,7 +154,8 @@ module.exports = {
 	assert.equal(newTarget.foo[0].name, "one");
 	assert.equal(newTarget.foo[1].name, "two");
 	assert.equal(newTarget.foo.length, 2);
-
+    },
+    'test applyCommand to create an object past the end of the paths array bounds' : function(assert) {
 	var newCommand = new sync.Command("create", ["foo", {"id" : 2}, "objects", 3], {"id" : 9, "name" : "new"});
 	var newTarget = {foo : [{"id" : 1,
 				 "name" : "one"},
@@ -164,7 +166,20 @@ module.exports = {
 	sync.applyCommand(newTarget, newCommand);
 	assert.equal(newTarget.foo[1].objects[2].name, "new");
 	assert.equal(newTarget.foo[1].objects[2].id, 9);
+    },
+//     'test applyCommand to delete an object' : function(assert) {
+// 	var newCommand = new sync.Command("delete", ["foo", {"id" : 1}]);
+// 	var newTarget = {foo : [{"id" : 1,
+// 				 "name" : "one"},
+// 				{"id" : 2,
+// 				 "name" : "two"}]
+// 			};
+// 	sync.applyCommand(newTarget, newCommand);
+// 	assert.equal(newTarget.foo.length, 1);
+// 	assert.equal(newTarget.foo[0].name, "two");
 
+//     }
+    'test applyCommand to create an object in the middle of the paths array' : function(assert) {
 	var newCommand = new sync.Command("create", ["foo", {"id" : 2}, "objects", 1], {"id" : 9, "name" : "new"});
 	var newTarget = {foo : [{"id" : 1,
 				 "name" : "one"},
@@ -176,7 +191,23 @@ module.exports = {
 	assert.equal(newTarget.foo[1].objects[0].id, 8);
 	assert.equal(newTarget.foo[1].objects[1].id, 9);
 	assert.equal(newTarget.foo[1].objects[2].id, 10);
+
     },
+    'test applyCommand with a move' : function(assert) {
+	var newCommand = new sync.Command("move", ["foo", {"id" : 1}], ["foo", {"id" : 2}, "objects", 1]);
+	var newTarget = {foo : [{"id" : 1,
+				 "name" : "one"},
+				{"id" : 2,
+				 "objects" : [{"id" : 8, "name" : "eight"},
+					      {"id" : 10, "name" : "ten"}]}]
+			};
+	sync.applyCommand(newTarget, newCommand);
+	assert.equal(newTarget.foo.length, 1);
+	assert.equal(newTarget.foo[0].objects[0].id, 8);
+	assert.equal(newTarget.foo[0].objects[1].id, 1);
+	assert.equal(newTarget.foo[0].objects[2].id, 10);
+    },
+    
     'test applyCommand on an object that has moved' : function(assert) {
 	var newCommand = new sync.Command("edit", ["foo", {"id" : 6}, "name"], "test");
 	var newTarget = {foo : [{"id" : 1,
