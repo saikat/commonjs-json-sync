@@ -345,7 +345,8 @@ function applyCommand(target, command) {
  * Apply a list of commands to an object.
  **/
 applyCommands = function(target, commands) {
-    forEach(commands, partial(applyCommand, target));
+    var commandsClone = JSON.parse(JSON.stringify(commands))
+    forEach(commandsClone, partial(applyCommand, target));
 }
 
 detectUpdates = partial(_detectUpdates, []);

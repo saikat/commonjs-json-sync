@@ -231,6 +231,16 @@ module.exports = {
 	assert.equal(newTarget.foo[3].name, "four");
 	assert.equal(newTarget.foo[4].objects[1].name, "hello");
     },
+
+    'test that applyCommands does not mutate the commands' : function(assert) {
+	var commands = [new sync.Command("create", ["foo", 0], {"id" : 1, "objects" : []}),
+			new sync.Command("create", ["foo", {"id" : 1}, "objects", 0], 5)];
+	var target = {"foo" : []};
+	sync.applyCommands(target, commands);
+	assert.equal(target.foo[0].id, 1);
+	assert.equal(target.foo[0].objects[0], 5);
+	assert.equal(commands[0].value.objects.length, 0);
+    }
     
 };
 
