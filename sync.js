@@ -330,8 +330,17 @@ function applyCommand(target, command) {
 	newContainer.splice(command.value[command.value.length - 1], 0, reference.obj);
     }
 	
-    if (command.action == "remove")
-	container.splice([command.path[command.path.length - 1]]);
+    if (command.action == "remove") {
+	if (isArray(container)) {
+	    if (!command.path[command.path.length-1].hasOwnProperty("id"))
+		return;
+
+	    var reference = idToReferenceAndIndex(container, command.path[command.path.length - 1].id);
+	    container.splice(reference.index, 1);
+	}
+	else
+	    delete container[command.path[command.path.length - 1]];
+    }
 
     else if (command.action == "create" && 
         isArray(container))

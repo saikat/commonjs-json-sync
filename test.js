@@ -167,18 +167,29 @@ module.exports = {
 	assert.equal(newTarget.foo[1].objects[2].name, "new");
 	assert.equal(newTarget.foo[1].objects[2].id, 9);
     },
-//     'test applyCommand to delete an object' : function(assert) {
-// 	var newCommand = new sync.Command("delete", ["foo", {"id" : 1}]);
-// 	var newTarget = {foo : [{"id" : 1,
-// 				 "name" : "one"},
-// 				{"id" : 2,
-// 				 "name" : "two"}]
-// 			};
-// 	sync.applyCommand(newTarget, newCommand);
-// 	assert.equal(newTarget.foo.length, 1);
-// 	assert.equal(newTarget.foo[0].name, "two");
+    'test applyCommand to delete an object in the middle of an array' : function(assert) {
+	var command = new sync.Command("remove", ["foo", {"id" : 2}]);
+	var target = {"foo" : [{"id" : 1,
+				"name" : "one"},
+			       {"id" : 2,
+				"name" : "two"},
+			       {"id" : 3,
+				"name" : "three"}]};
 
-//     }
+	sync.applyCommand(target, command);
+	assert.equal(target.foo.length, 2);
+	assert.equal(target.foo[0].id, 1);
+	assert.equal(target.foo[1].id, 3);
+    },
+
+    'test applyCommand to delete an object not in an array' : function(assert) {
+	var command = new sync.Command("remove", ["foo", "name"]);
+	var target = {"foo" : {"name" : "test",
+			       "prop1" : "hello"}};
+	sync.applyCommand(target, command);
+	assert.equal(target.foo.name, undefined);
+	assert.equal(target.foo.prop1, "hello");
+    },
     'test applyCommand to create an object in the middle of the paths array' : function(assert) {
 	var newCommand = new sync.Command("create", ["foo", {"id" : 2}, "objects", 1], {"id" : 9, "name" : "new"});
 	var newTarget = {foo : [{"id" : 1,
